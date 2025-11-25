@@ -5,9 +5,6 @@ import com.avianmc.sprocket.world.World;
 
 import java.awt.*;
 
-/**
- * Utility for converting between screen and isometric world coordinates.
- */
 public class IsoProjector {
     private final RenderConfig cfg;
 
@@ -20,8 +17,6 @@ public class IsoProjector {
         double wx = (sx - panelW / 2.0) / zoom + camera.getX();
         double wy = (sy - panelH / 2.0) / zoom + camera.getY();
 
-        // Offset detection area to match the highlight which is drawn half a tile height lower.
-        // Convert the half-tile screen shift to world space by dividing out zoom.
         wy -= (cfg.tileH / 2.0);
 
         double dx = cfg.tileW / 2.0;

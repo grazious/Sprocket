@@ -37,11 +37,9 @@ public class ExampleFeature extends WorldFeature {
 
                 double n = fbm(nx, ny);
 
-                // move -1..1 -> 0..1
                 n = (n + 1.0) * 0.5;
 
                 if (n > threshold) {
-                    // in your engine: apply to world, not raw 2D array
                     world.set(x, y, 1, Tiles.GRASS);
                 }
             }

@@ -9,11 +9,6 @@ import com.avianmc.sprocket.world.World;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-/**
- * Renders a multi-chunk world using per-chunk offscreen buffers. Only chunks
- * marked dirty are re-rendered to their own images. Each frame, chunk images
- * are composed in isometric chunk-diagonal order and scaled by camera zoom.
- */
 public class WorldRenderer {
     private final RenderConfig cfg;
     private final World world;
@@ -21,8 +16,6 @@ public class WorldRenderer {
     private static class ChunkBuffer {
         BufferedImage image;
         boolean dirty = true;
-        // World-space anchoring encoded via these origins, matching previous formula:
-        // buffer screen position = (-originX - camX, -originY - camY) scaled by zoom, centered
         int originX;
         int originY;
     }
@@ -36,14 +29,6 @@ public class WorldRenderer {
         for (int cx = 0; cx < world.getChunksX(); cx++) {
             for (int cy = 0; cy < world.getChunksY(); cy++) {
                 buffers[cx][cy] = new ChunkBuffer();
-            }
-        }
-    }
-
-    public void markDirty() {
-        for (int cx = 0; cx < buffers.length; cx++) {
-            for (int cy = 0; cy < buffers[0].length; cy++) {
-                buffers[cx][cy].dirty = true;
             }
         }
     }
@@ -71,8 +56,6 @@ public class WorldRenderer {
 
         int startX = cx * Chunk.SIZE;
         int startY = cy * Chunk.SIZE;
-        int endX = startX + Chunk.SIZE - 1;
-        int endY = startY + Chunk.SIZE - 1;
 
         double minX = Double.POSITIVE_INFINITY;
         double minY = Double.POSITIVE_INFINITY;
@@ -80,7 +63,6 @@ public class WorldRenderer {
         double maxY = Double.NEGATIVE_INFINITY;
         boolean hasAny = false;
 
-        // First pass: bounds for this chunk only (iterate along local diagonals)
         for (int s = 0; s <= (Chunk.SIZE - 1) * 2; s++) {
             for (int lx = 0; lx < Chunk.SIZE; lx++) {
                 int ly = s - lx;
@@ -125,7 +107,6 @@ public class WorldRenderer {
         cg.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         cg.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
 
-        // Second pass: draw tiles for this chunk in correct order
         for (int s = 0; s <= (Chunk.SIZE - 1) * 2; s++) {
             for (int lx = 0; lx < Chunk.SIZE; lx++) {
                 int ly = s - lx;

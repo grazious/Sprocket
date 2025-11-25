@@ -9,7 +9,5 @@ public abstract class Rule {
         this.id = id;
     }
 
-    public String id() { return id; }
-
     public abstract boolean test(World world, int x, int y, int layer);
 }
