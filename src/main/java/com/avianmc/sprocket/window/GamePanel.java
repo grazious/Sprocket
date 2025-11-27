@@ -16,7 +16,7 @@ import java.awt.event.*;
 
 public class GamePanel extends JPanel implements Runnable {
 
-    private static final Tile PLACED_TILE = Tiles.TREE;
+    private static final Tile PLACED_TILE = Tiles.GRASS;
 
     private final RenderConfig renderCfg = new RenderConfig(32, 16, 8);
     private final IsoProjector projector = new IsoProjector(renderCfg);
