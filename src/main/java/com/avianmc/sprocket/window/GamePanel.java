@@ -16,7 +16,8 @@ import java.awt.event.*;
 
 public class GamePanel extends JPanel implements Runnable {
 
-    // Rendering helpers
+    private static final Tile PLACED_TILE = Tiles.TREE;
+
     private final RenderConfig renderCfg = new RenderConfig(32, 16, 8);
     private final IsoProjector projector = new IsoProjector(renderCfg);
 
@@ -154,8 +155,6 @@ public class GamePanel extends JPanel implements Runnable {
 
             if (rightDown) {
                 placeAtAnchor();
-            } else {
-                // when released we already cleared cooldowns in mouseReleased handler
             }
 
             prevRightDown = rightDown;
@@ -191,10 +190,7 @@ public class GamePanel extends JPanel implements Runnable {
             placeAnchorY = hi.y;
         }
 
-        boolean movedToNewTile =
-                hi.x != placeAnchorX || hi.y != placeAnchorY;
-
-        if (movedToNewTile) {
+        if (hi.x != placeAnchorX || hi.y != placeAnchorY) {
             placeAnchorX = hi.x;
             placeAnchorY = hi.y;
         }
@@ -202,12 +198,12 @@ public class GamePanel extends JPanel implements Runnable {
         int baseX = placeAnchorX;
         int baseY = placeAnchorY;
 
-        Integer targetLayer = findPlacementLayerAt(baseX, baseY, Tiles.GRASS);
+        Integer targetLayer = findPlacementLayerAt(baseX, baseY, PLACED_TILE);
         if (targetLayer == null) return;
 
         Tile current = world.get(baseX, baseY, targetLayer);
-        if (current != Tiles.GRASS) {
-            world.set(baseX, baseY, targetLayer, Tiles.GRASS);
+        if (current != PLACED_TILE) {
+            world.set(baseX, baseY, targetLayer, PLACED_TILE);
             worldRenderer.markTileDirty(baseX, baseY);
         }
 
@@ -216,7 +212,6 @@ public class GamePanel extends JPanel implements Runnable {
         lastPlaceLayer = targetLayer;
         placeCooldown = PLACE_LAYER_COOLDOWN_TICKS;
     }
-
 
     private void breakAtCursor(boolean newPress) {
         Hover hi = computeHighlightTarget(mouseX, mouseY);
@@ -302,7 +297,6 @@ public class GamePanel extends JPanel implements Runnable {
             overlayRenderer.drawHighlight(g2, hi.x, hi.y, hi.layer, getWidth(), getHeight(), camera);
         }
 
-        // HUD
         overlayRenderer.drawHUD(g2, fps, camera.getZoom());
 
         g2.dispose();

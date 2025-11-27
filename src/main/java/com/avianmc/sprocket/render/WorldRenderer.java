@@ -10,6 +10,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class WorldRenderer {
+
     private final RenderConfig cfg;
     private final World world;
 
@@ -20,11 +21,12 @@ public class WorldRenderer {
         int originY;
     }
 
-    private final ChunkBuffer[][] buffers; // [cx][cy]
+    private final ChunkBuffer[][] buffers;
 
     public WorldRenderer(RenderConfig cfg, World world) {
         this.cfg = cfg;
         this.world = world;
+
         this.buffers = new ChunkBuffer[world.getChunksX()][world.getChunksY()];
         for (int cx = 0; cx < world.getChunksX(); cx++) {
             for (int cy = 0; cy < world.getChunksY(); cy++) {
@@ -51,6 +53,7 @@ public class WorldRenderer {
 
     private void renderChunk(int cx, int cy) {
         ChunkBuffer buf = buffers[cx][cy];
+
         double dx = cfg.tileW / 2.0;
         double dy = cfg.tileH / 2.0;
 
@@ -67,22 +70,29 @@ public class WorldRenderer {
             for (int lx = 0; lx < Chunk.SIZE; lx++) {
                 int ly = s - lx;
                 if (ly < 0 || ly >= Chunk.SIZE) continue;
+
                 int x = startX + lx;
                 int y = startY + ly;
+
                 for (int z = 0; z < Chunk.LAYERS; z++) {
                     Tile t = world.get(x, y, z);
                     if (t == Tiles.AIR) continue;
+
                     Image img = t.getTexture();
                     if (img == null) continue;
+
                     hasAny = true;
 
                     double wx = (x - y) * dx;
                     double wy = (x + y) * dy - z * cfg.layerH;
 
-                    double left = wx - img.getWidth(null) / 2.0;
-                    double top = wy;
-                    double right = left + img.getWidth(null);
-                    double bottom = top + img.getHeight(null);
+                    int w = img.getWidth(null);
+                    int h = img.getHeight(null);
+
+                    double top    = wy - (h - (cfg.tileH * 2));
+                    double left   = wx - w / 2.0;
+                    double right  = left + w;
+                    double bottom = top + h;
 
                     if (left < minX) minX = left;
                     if (top < minY) minY = top;
@@ -99,35 +109,44 @@ public class WorldRenderer {
 
         int imgW = (int) Math.ceil(maxX - minX);
         int imgH = (int) Math.ceil(maxY - minY);
+
         buf.originX = (int) Math.floor(-minX);
         buf.originY = (int) Math.floor(-minY);
 
         buf.image = new BufferedImage(Math.max(1, imgW), Math.max(1, imgH), BufferedImage.TYPE_INT_ARGB);
+
         Graphics2D cg = buf.image.createGraphics();
-        cg.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         cg.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
 
         for (int s = 0; s <= (Chunk.SIZE - 1) * 2; s++) {
             for (int lx = 0; lx < Chunk.SIZE; lx++) {
                 int ly = s - lx;
                 if (ly < 0 || ly >= Chunk.SIZE) continue;
+
                 int x = startX + lx;
                 int y = startY + ly;
+
                 for (int z = 0; z < Chunk.LAYERS; z++) {
                     Tile t = world.get(x, y, z);
                     if (t == Tiles.AIR) continue;
+
                     Image img = t.getTexture();
                     if (img == null) continue;
 
                     double wx = (x - y) * dx;
                     double wy = (x + y) * dy - z * cfg.layerH;
 
-                    int drawX = buf.originX + (int) Math.round(wx) - img.getWidth(null) / 2;
-                    int drawY = buf.originY + (int) Math.round(wy);
+                    int w = img.getWidth(null);
+                    int h = img.getHeight(null);
+
+                    int drawX = buf.originX + (int)Math.round(wx) - w / 2;
+                    int drawY = buf.originY + (int)Math.round(wy - (h - (cfg.tileH * 2)));
+
                     cg.drawImage(img, drawX, drawY, null);
                 }
             }
         }
+
         cg.dispose();
         buf.dirty = false;
     }
@@ -136,22 +155,29 @@ public class WorldRenderer {
         double zoom = camera.getZoom();
         double cx = panelW / 2.0;
         double cy = panelH / 2.0;
+
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
 
         int chunksX = world.getChunksX();
         int chunksY = world.getChunksY();
         int maxDiag = (chunksX - 1) + (chunksY - 1);
+
         for (int s = 0; s <= maxDiag; s++) {
             int minCX = Math.max(0, s - (chunksY - 1));
             int maxCX = Math.min(chunksX - 1, s);
+
             for (int cxIdx = minCX; cxIdx <= maxCX; cxIdx++) {
                 int cyIdx = s - cxIdx;
+
                 ChunkBuffer buf = buffers[cxIdx][cyIdx];
                 if (buf.image == null) continue;
-                int drawX = (int) Math.round(((-buf.originX - camera.getX()) * zoom) + cx);
-                int drawY = (int) Math.round(((-buf.originY - camera.getY()) * zoom) + cy);
-                int drawW = (int) Math.round(buf.image.getWidth() * zoom);
-                int drawH = (int) Math.round(buf.image.getHeight() * zoom);
+
+                int drawX = (int)Math.round(((-buf.originX - camera.getX()) * zoom) + cx);
+                int drawY = (int)Math.round(((-buf.originY - camera.getY()) * zoom) + cy);
+
+                int drawW = (int)Math.round(buf.image.getWidth() * zoom);
+                int drawH = (int)Math.round(buf.image.getHeight() * zoom);
+
                 g2.drawImage(buf.image, drawX, drawY, drawW, drawH, null);
             }
         }
