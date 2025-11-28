@@ -3,12 +3,9 @@ package com.avianmc.sprocket.world;
 import com.avianmc.sprocket.tile.Tile;
 import com.avianmc.sprocket.tile.Tiles;
 
-/**
- * Represents a fixed-size chunk of tiles with multiple vertical layers.
- */
 public class Chunk {
     public static final int SIZE = 16;
-    public static final int LAYERS = 8;
+    public static final int LAYERS = 16;
 
     private final Tile[][][] tiles; // [layer][x][y]
 

@@ -13,7 +13,7 @@ public class Main {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
 
-            WorldGenerator.registerFeature(new TerrainFeature(0.05));
+            WorldGenerator.registerFeature(new TerrainFeature(0.02));
             WorldGenerator.registerFeature(new TreeFeature(0.025));
             WorldGenerator.registerFeature(new RockFeature(0.0025));
 

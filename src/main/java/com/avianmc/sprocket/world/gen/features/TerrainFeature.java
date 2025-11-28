@@ -12,9 +12,10 @@ public class TerrainFeature extends WorldFeature {
 
     private final OpenSimplexNoise noise;
     private final double baseScale;
-
     private final int octaves = 4;
     private final double persistence = 0.5;
+
+    private final double heightStrength = 6.0;
 
     private static final double SCALE_MULTIPLIER = 20.0;
 
@@ -26,11 +27,12 @@ public class TerrainFeature extends WorldFeature {
     @Override
     public void apply(World world, FeatureContext ctx) {
 
-        int width = ctx.worldWidth;
+        int width  = ctx.worldWidth;
         int height = ctx.worldHeight;
 
-        final int layers = Chunk.LAYERS;
-        final int topLayer = layers - 1;
+        int layers    = Chunk.LAYERS;
+        int topLayer  = layers - 1;
+        double half   = layers / 2.0;
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
@@ -40,7 +42,8 @@ public class TerrainFeature extends WorldFeature {
 
                 double n = fbm(nx, ny);
 
-                int terrainHeight = (int) ((n + octaves) / (2 * octaves) * topLayer);
+                double h = (n * heightStrength) + half;
+                int terrainHeight = (int) h;
 
                 if (terrainHeight < 0) terrainHeight = 0;
                 if (terrainHeight > topLayer) terrainHeight = topLayer;
@@ -58,9 +61,7 @@ public class TerrainFeature extends WorldFeature {
         double amplitude = 1.0;
 
         for (int i = 0; i < octaves; i++) {
-            double sample = noise.getNoise2D(x * frequency, y * frequency).getValue();
-            total += sample * amplitude;
-
+            total += noise.getNoise2D(x * frequency, y * frequency).getValue() * amplitude;
             amplitude *= persistence;
             frequency *= 2.0;
         }
